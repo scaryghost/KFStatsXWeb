@@ -1,6 +1,7 @@
 <?php
 $response="google.visualization.Query.setResponse({version: '0.6', reqId: '0', status: 'ok', table:";
-$file= 'http://127.0.0.1:8080/sessions.xml?steamid64=' . $_REQUEST["steamid64"];
+$query= split("," , $_GET['tq']);
+$file= 'http://127.0.0.1:8080/sessions.xml?steamid64=' . $_REQUEST["steamid64"] . '&page=' . $query[0] . '&rows=' . $query[1];
 $stats= simplexml_load_file($file);
 
 $jsonData["cols"]= array(array("label" => "Level", "type" => "string"), 
