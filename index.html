@@ -1,280 +1,175 @@
 <!DOCTYPE HTML>
 <html>
-    <head>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-		<title>KFStatsX</title>
-        <script type='text/javascript' src='https://www.google.com/jsapi'></script>
-		<script type="text/javascript" src="jquery-1.8.2.js"></script>
-		<link href='http://fonts.googleapis.com/css?family=Vollkorn' rel='stylesheet' type='text/css'>		
-		<link rel="stylesheet" type="text/css" href="style.css" />		
-		
-		<style type="text/css">
-		html, body, ul, ol, li, form, fieldset, legend{
-			margin: 0;
-			padding: 0;
-		}
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>KFStatsX</title>
 
-		h1, h2, h3, h4, h5, h6, p { margin: 0; }
-		
-		body{
-			background: url('bg.png') repeat;
-			font-family: 'Vollkorn', serif, Arial;
-			font-size: 15px;
-			line-height: 1.5;
-		}
-				
-		p{
-			margin-bottom:15px;
-		}
-		
-		a{
-			color:#0073BF;
-			text-decoration:none;
-		}
-		
-		h2{
-			text-align:center;
-			font-size:32px;
-			font-weight:400;
-		}
-		
-		h4{
-			text-align:center;
-			font-size:18px;	
-			font-weight:400;			
-		}
-		
-		#wrap{			
-			width:1280px;
-			margin:0 auto;
-		}
-		
-		#header{
-			margin:20px 0;
-		}
-				
-		#content{		
-			overflow:hidden;
-			-moz-box-shadow: 0 0 2px 2px #ccc;
-			-webkit-box-shadow: 0 0 2px 2px #ccc;
-			box-shadow: 0 0 2px 2px #ccc;			
-		}
-		
-		.contentbox-wrapper{			
-			position:relative; 
-			left:0; 
-			width:12000px; 
-			height:875px;
-		}
-		
-		.contentbox{
-			width:1260px; 
-			height:875px; 
-			float:left; 
-			padding:10px;
-			background:#fff;
-            overflow-y:auto;
-            overflow-x:hidden;
-		}
-		
-		#nav {
-			margin-top:10px;
-			background: url("navbg.png") repeat-x center bottom;
-			border-bottom: 1px solid #DDDDDD;
-			padding: 5px 10px;
-		}
-		
-		#nav ul li{
-			display:inline;
-			margin-right:10px;
-		}
-		
-		#nav a.active {
-			font-weight:bold;
-		}		
-		
-		#footer{
-			text-align:center;
-			margin-top:20px;
-		}	
+    <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+    <script type="text/javascript" src="jquery-1.8.2.js"></script>
+    <script type="text/javascript" src="tablequerywrapper.js"></script>
+    <script type="text/javascript" src="kfstatsx.js"></script>
 
-		</style>
-
-		
-<script>
-
-function goto(id, t){	
-	//animate to the div id.
-	$(".contentbox-wrapper").animate({"left": -($(id).position().left)}, 600);
-	
-	// remove "active" class from all links inside #nav
-    $('#nav a').removeClass('active');
-	
-	// add active class to the current link
-    $(t).addClass('active');	
-}
-
-</script>
-
-<script type="text/javascript" src="tablequerywrapper.js"></script>
-<script type="text/javascript">
-    google.load('visualization', '1', {'packages' : ['table']});
-    google.setOnLoadCallback(init);
-
-    var dataSourceUrl = 'Records.php';
-    var query, options, container;
-
-    function init() {
-      query = new google.visualization.Query(dataSourceUrl);
-      container = document.getElementById("records_div");
-      options = {'pageSize': 25};
-      sendAndDraw();
-    }
-
-    function sendAndDraw() {
-      query.abort();
-      var tableQueryWrapper = new TableQueryWrapper(query, container, options);
-      tableQueryWrapper.sendAndDraw();
-    }
-
-    function setOption(prop, value) {
-      options[prop] = value;
-      sendAndDraw();
-    }
-
-</script>
-
-<script type='text/javascript'>
-            google.load('visualization', '1', {packages:['table','corechart']});
-            google.setOnLoadCallback(drawTable);
-
-            function drawTable() {
-                var summaryData = $.ajax({
-                    url: "Summary.php",
-                    dataType:"text",
-                    async: false
-                }).responseText;
-                document.getElementById("summary_div").innerHTML= summaryData;
-
-                var levelData = $.ajax({
-                    url: "LevelData.php",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                var data= new google.visualization.DataTable(levelData);
-                var table= new google.visualization.Table(document.getElementById('level_div'));
-                table.draw(data, {allowHtml: true});
-
-                var diffData = $.ajax({
-                    url: "DifficultyData.php",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                data= new google.visualization.DataTable(diffData);
-                table= new google.visualization.Table(document.getElementById('difficulty_div'));
-                table.draw(data, {allowHtml: true});
-
-                var deathData = $.ajax({
-                    url: "DeathsData.php",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                data= new google.visualization.DataTable(deathData);
-                var chart= new google.visualization.PieChart(document.getElementById('deaths_div'));
-                chart.draw(data, {height: 500,title: 'Deaths' });
-
-                var killData = $.ajax({
-                    url: "KillsData.php",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                data= new google.visualization.DataTable(killData);
-                chart= new google.visualization.PieChart(document.getElementById('kills_div'));
-                chart.draw(data, {height: 500,title: 'Kills' })
-
-                var killData = $.ajax({
-                    url: "PerksData.php",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                data= new google.visualization.DataTable(killData);
-                chart= new google.visualization.PieChart(document.getElementById('perks_div'));
-                chart.draw(data, {height: 500,title: 'Perks' })
-
-
-               var weaponData = $.ajax({
-                    url: "WeaponData.php",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-          
-                data = new google.visualization.DataTable(weaponData);
-                options = {
-                  vAxis: {title: 'Weapon',  titleTextStyle: {color: 'red'}, textStyle: {fontSize: 12}},
-                  chartArea: {top: 0, height: "95%"}
-                };
+    <link href='http://fonts.googleapis.com/css?family=Vollkorn' rel='stylesheet' type='text/css'>      
+    <link rel="stylesheet" type="text/css" href="kfstatsx.css" />       
+        
+    <script>
+        function goto(id, t){   
+            //animate to the div id.
+            $(".contentbox-wrapper").animate({"left": -($(id).position().left)}, 600);
+        
+            // remove "active" class from all links inside #nav
+            $('#nav a').removeClass('active');
     
-                chart = new google.visualization.BarChart(document.getElementById('weapons_div'));
-                chart.draw(data, options); 
+            // add active class to the current link
+            $(t).addClass('active');    
+        }
 
-            }
-</script>
+    </script>
+    <script type="text/javascript">
+        google.load('visualization', '1', {'packages' : ['table']});
+        google.setOnLoadCallback(init);
 
-	</head>
-	
-	<body>
-		
-		<div id="wrap">
-		<div id="nav">
-			<ul>
+        var dataSourceUrl = 'Records.php';
+        var query, options, container;
+
+        function init() {
+            query = new google.visualization.Query(dataSourceUrl);
+            container = document.getElementById("records_div");
+            options = {'pageSize': 25};
+            sendAndDraw();
+        }
+
+        function sendAndDraw() {
+            query.abort();
+            var tableQueryWrapper = new TableQueryWrapper(query, container, options);
+            tableQueryWrapper.sendAndDraw();
+        }
+
+        function setOption(prop, value) {
+            options[prop] = value;
+            sendAndDraw();
+        }
+    </script>
+
+    <script type='text/javascript'>
+        google.load('visualization', '1', {packages:['table','corechart']});
+        google.setOnLoadCallback(drawTable);
+
+        function drawTable() {
+            var summaryData = $.ajax({
+                url: "Summary.php",
+                dataType:"text",
+                async: false
+            }).responseText;
+            document.getElementById("summary_div").innerHTML= summaryData;
+
+            var levelData = $.ajax({
+                url: "LevelData.php",
+                dataType:"json",
+                async: false
+            }).responseText;
+            var data= new google.visualization.DataTable(levelData);
+            var table= new google.visualization.Table(document.getElementById('level_div'));
+            table.draw(data, {allowHtml: true});
+
+            var diffData = $.ajax({
+                url: "DifficultyData.php",
+                dataType:"json",
+                async: false
+            }).responseText;
+            data= new google.visualization.DataTable(diffData);
+            table= new google.visualization.Table(document.getElementById('difficulty_div'));
+            table.draw(data, {allowHtml: true});
+
+            var deathData = $.ajax({
+                url: "DeathsData.php",
+                dataType:"json",
+                async: false
+            }).responseText;
+            data= new google.visualization.DataTable(deathData);
+            var chart= new google.visualization.PieChart(document.getElementById('deaths_div'));
+            chart.draw(data, {height: 500,title: 'Deaths' });
+
+            var killData = $.ajax({
+                url: "KillsData.php",
+                dataType:"json",
+                async: false
+            }).responseText;
+            data= new google.visualization.DataTable(killData);
+            chart= new google.visualization.PieChart(document.getElementById('kills_div'));
+            chart.draw(data, {height: 500,title: 'Kills' })
+
+            var killData = $.ajax({
+                url: "PerksData.php",
+                dataType:"json",
+                async: false
+            }).responseText;
+            data= new google.visualization.DataTable(killData);
+            chart= new google.visualization.PieChart(document.getElementById('perks_div'));
+            chart.draw(data, {height: 500,title: 'Perks' })
+
+
+            var weaponData = $.ajax({
+                url: "WeaponData.php",
+                dataType:"json",
+                async: false
+            }).responseText;
+      
+            data = new google.visualization.DataTable(weaponData);
+            options = {vAxis: {title: 'Weapon',  titleTextStyle: {color: 'red'}, textStyle: {fontSize: 12}},
+                chartArea: {top: 0, height: "95%"}
+            };
+            chart = new google.visualization.BarChart(document.getElementById('weapons_div'));
+            chart.draw(data, options); 
+
+        }
+    </script>
+</head>
+<body>
+    <div id="wrap">
+        <div id="nav">
+            <ul>
                 <li><a class="active" href="#" onClick="goto('#summary_div', this); return false">Summary</a></li>
-				<li><a href="#" onClick="goto('#level_div', this); return false">Levels</a></li>
-				<li><a href="#" onClick="goto('#difficulty_div', this); return false">Difficulty</a></li>
+                <li><a href="#" onClick="goto('#level_div', this); return false">Levels</a></li>
+                <li><a href="#" onClick="goto('#difficulty_div', this); return false">Difficulty</a></li>
                 <li><a href="#" onClick="goto('#deaths_div', this); return false">Deaths</a></li>
                 <li><a href="#" onClick="goto('#kills_div', this); return false">Kills</a></li>
                 <li><a href="#" onClick="goto('#perks_div', this); return false">Perks</a></li>
                 <li><a href="#" onClick="goto('#weapons_div', this); return false">Weapons</a></li>
                 <li><a href="#" onClick="goto('#records_div', this); return false">Records</a></li>
-			</ul>
-		</div>
-		
-		<div id="content">
-			<div class="contentbox-wrapper">
+            </ul>
+        </div>
+        <div id="content">
+            <div class="contentbox-wrapper">
                 <div id="summary_div" class="contentbox"></div>
-				<div id="level_div" class="contentbox"></div>
-				<div id="difficulty_div" class="contentbox"></div>
+                <div id="level_div" class="contentbox"></div>
+                <div id="difficulty_div" class="contentbox"></div>
                 <div id="deaths_div" class="contentbox"></div>
                 <div id="kills_div" class="contentbox"></div>
                 <div id="perks_div" class="contentbox"></div>
-				<div id="weapons_div" class="contentbox"></div>
+                <div id="weapons_div" class="contentbox"></div>
                 <div id="records_div_outer" class="contentbox">
                     <form action="">
-  Number of rows to show:
-  <select onChange="setOption('pageSize', parseInt(this.value, 10))">
-    <option selected=selectedvalue="25">25</option>
-    <option value="50">50</option>
-    <option value="100">100</option>
-    <option value="250">250</option>
-  </select>
-</form>
-<form action='profile.html' method='get' style="text-align:left">
-                    Enter player's <a href="http://steamidconverter.com/" target="_blank">steamID64: </a>
-                    <input type='text' name='steamid64' />
-                    <input type='submit' value='Search Player' />
-                </form>
+                        Number of rows to show:
+                        <select onChange="setOption('pageSize', parseInt(this.value, 10))">
+                            <option selected=selectedvalue="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                        </select>
+                    </form>
+                    <form action='profile.html' method='get' style="text-align:left">
+                        Enter player's <a href="http://steamidconverter.com/" target="_blank">steamID64: </a>
+                        <input type='text' name='steamid64' />
+                        <input type='submit' value='Search Player' />
+                    </form>
                     <div id="records_div"></div>
                 </div>
-			</div>			
-			
-		</div>		
-		
-		<div id="footer">
-			Tutorial by <a href="http://gazpo.com/">gazpo.com</a>.
-		</div>
-			
-			
-		</div>	
-	
-	</body>
-
+            </div>          
+        </div>      
+        <div id="footer">
+            Tutorial by <a href="http://gazpo.com/">gazpo.com</a>.
+        </div>
+    </div>  
+</body>
 </html>

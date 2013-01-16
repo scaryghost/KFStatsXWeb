@@ -1,288 +1,147 @@
 <!DOCTYPE HTML>
 <html>
-    <head>
-		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-		<title>KFStatsX</title>
-        <script type='text/javascript' src='https://www.google.com/jsapi'></script>
-		<script type="text/javascript" src="jquery-1.8.2.js"></script>
-		<link href='http://fonts.googleapis.com/css?family=Vollkorn' rel='stylesheet' type='text/css'>		
-		<link rel="stylesheet" type="text/css" href="style.css" />		
-		
-		<style type="text/css">
-		html, body, ul, ol, li, form, fieldset, legend{
-			margin: 0;
-			padding: 0;
-		}
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>KFStatsX</title>
 
-		h1, h2, h3, h4, h5, h6, p { margin: 0; }
-		
-		body{
-			background: url('bg.png') repeat;
-			font-family: 'Vollkorn', serif, Arial;
-			font-size: 15px;
-			line-height: 1.5;
-		}
-				
-		p{
-			margin-bottom:15px;
-		}
-		
-		a{
-			color:#0073BF;
-			text-decoration:none;
-		}
-		
-		h2{
-			text-align:center;
-			font-size:32px;
-			font-weight:400;
-		}
-		
-		h4{
-			text-align:center;
-			font-size:18px;	
-			font-weight:400;			
-		}
-		
-		#wrap{			
-			width:1280px;
-			margin:0 auto;
-		}
-		
-		#header{
-			margin:20px 0;
-		}
-				
-		#content{		
-			overflow:hidden;
-			-moz-box-shadow: 0 0 2px 2px #ccc;
-			-webkit-box-shadow: 0 0 2px 2px #ccc;
-			box-shadow: 0 0 2px 2px #ccc;			
-		}
-		
-		.contentbox-wrapper{			
-			position:relative; 
-			left:0; 
-			width:12000px; 
-			height:720px;
-		}
-		
-		.contentbox{
-			width:1260px; 
-			height:720px; 
-			float:left; 
-			padding:10px;
-			background:#fff;
-            overflow-y:auto;
-            overflow-x:hidden;
-		}
-		
-		#nav {
-			margin-top:10px;
-			background: url("navbg.png") repeat-x center bottom;
-			border-bottom: 1px solid #DDDDDD;
-			padding: 5px 10px;
-		}
-		
-		#nav ul li{
-			display:inline;
-			margin-right:10px;
-		}
-		
-		#nav a.active {
-			font-weight:bold;
-		}		
-		
-		#footer{
-			text-align:center;
-			margin-top:20px;
-		}	
+    <script type='text/javascript' src='https://www.google.com/jsapi'></script>
+    <script type="text/javascript" src="jquery-1.8.2.js"></script>
+    <script type="text/javascript" src="kfstatsx.js"></script>
+    <script type="text/javascript" src="tablequerywrapper.js"></script>
 
-		</style>
+    <link href='http://fonts.googleapis.com/css?family=Vollkorn' rel='stylesheet' type='text/css'>      
+    <link rel="stylesheet" type="text/css" href="kfstatsx.css" />       
+        
+    <script type="text/javascript">
+        google.load('visualization', '1', {'packages' : ['table']});
+        google.setOnLoadCallback(init);
+        var dataSourceUrl = 'SessionData.php?steamid64=' + getParameterByName("steamid64");
+        var query, options, container;
 
-		
-<script>
+        function init() {
+            query = new google.visualization.Query(dataSourceUrl);
+            container = document.getElementById("sessions_div");
+            options = {'pageSize': 25};
+            sendAndDraw();
+        }
 
-function goto(id, t){	
-	//animate to the div id.
-	$(".contentbox-wrapper").animate({"left": -($(id).position().left)}, 600);
-	
-	// remove "active" class from all links inside #nav
-    $('#nav a').removeClass('active');
-	
-	// add active class to the current link
-    $(t).addClass('active');	
-}
+        function sendAndDraw() {
+            query.abort();
+            var tableQueryWrapper = new TableQueryWrapper(query, container, options);
+            tableQueryWrapper.sendAndDraw();
+        }
 
-</script>
+        function setOption(prop, value) {
+            options[prop] = value;
+            sendAndDraw();
+        }
+    </script>
 
-<script type="text/javacript">
-</script>
-<script type="text/javascript" src="tablequerywrapper.js"></script>
-<script type="text/javascript">
-function getParameterByName(name)
-{
-  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  var regexS = "[\\?&]" + name + "=([^&#]*)";
-  var regex = new RegExp(regexS);
-  var results = regex.exec(window.location.search);
-  if(results == null)
-    return "";
-  else
-    return decodeURIComponent(results[1].replace(/\+/g, " "));
-}
-    google.load('visualization', '1', {'packages' : ['table']});
-    google.setOnLoadCallback(init);
-    var dataSourceUrl = 'SessionData.php?steamid64=' + getParameterByName("steamid64");
-    var query, options, container;
+    <script type='text/javascript'>
+        google.load('visualization', '1', {packages:['table','corechart']});
+        google.setOnLoadCallback(drawTable);
 
-    function init() {
-      query = new google.visualization.Query(dataSourceUrl);
-      container = document.getElementById("sessions_div");
-      options = {'pageSize': 25};
-      sendAndDraw();
-    }
+        function drawTable() {
+            var steamid64= getParameterByName("steamid64");
+            var profileData = $.ajax({
+                url: "PlayerInfo.php?steamid64=" + steamid64,
+                dataType:"text",
+                async: false
+            }).responseText;
+            document.getElementById("profile_div").innerHTML= profileData;
 
-    function sendAndDraw() {
-      query.abort();
-      var tableQueryWrapper = new TableQueryWrapper(query, container, options);
-      tableQueryWrapper.sendAndDraw();
-    }
+            var playerData = $.ajax({
+                url: "ProfileData.php?steamid64=" + steamid64 + "&category=player",
+                dataType:"json",
+                async: false
+            }).responseText;
+            var data= new google.visualization.DataTable(playerData);
+            var table= new google.visualization.Table(document.getElementById('player_div'));
+            table.draw(data, {allowHtml: true});
 
-    function setOption(prop, value) {
-      options[prop] = value;
-      sendAndDraw();
-    }
+            var actionData = $.ajax({
+                url: "ProfileData.php?steamid64=" + steamid64 + "&category=actions",
+                dataType:"json",
+                async: false
+            }).responseText;
+            data= new google.visualization.DataTable(actionData);
+            table= new google.visualization.Table(document.getElementById('actions_div'));
+            table.draw(data, {allowHtml: true});
 
-</script>
+            var killData = $.ajax({
+                url: "ProfileData.php?steamid64=" + steamid64 + "&category=kills",
+                dataType:"json",
+                async: false
+            }).responseText;
+            data= new google.visualization.DataTable(killData);
+            var chart= new google.visualization.PieChart(document.getElementById('kills_div'));
+            chart.draw(data, {height: 500,title: 'Kills' });
 
-<script type='text/javascript'>
-function getParameterByName(name)
-{
-  name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-  var regexS = "[\\?&]" + name + "=([^&#]*)";
-  var regex = new RegExp(regexS);
-  var results = regex.exec(window.location.search);
-  if(results == null)
-    return "";
-  else
-    return decodeURIComponent(results[1].replace(/\+/g, " "));
-}
-            google.load('visualization', '1', {packages:['table','corechart']});
-            google.setOnLoadCallback(drawTable);
+            var perksData = $.ajax({
+                url: "ProfileData.php?steamid64=" + steamid64 + "&category=perks",
+                dataType:"json",
+                async: false
+            }).responseText;
+            data= new google.visualization.DataTable(perksData);
+            chart= new google.visualization.PieChart(document.getElementById('perks_div'));
+            chart.draw(data, {height: 500,title: 'Perks' })
 
-            function drawTable() {
-                var steamid64= getParameterByName("steamid64");
-                var profileData = $.ajax({
-                    url: "PlayerInfo.php?steamid64=" + steamid64,
-                    dataType:"text",
-                    async: false
-                }).responseText;
-                document.getElementById("profile_div").innerHTML= profileData;
-
-
-                var playerData = $.ajax({
-                    url: "ProfileData.php?steamid64=" + steamid64 + "&category=player",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                var data= new google.visualization.DataTable(playerData);
-                var table= new google.visualization.Table(document.getElementById('player_div'));
-                table.draw(data, {allowHtml: true});
-
-                var actionData = $.ajax({
-                    url: "ProfileData.php?steamid64=" + steamid64 + "&category=actions",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                data= new google.visualization.DataTable(actionData);
-                table= new google.visualization.Table(document.getElementById('actions_div'));
-                table.draw(data, {allowHtml: true});
-
-                var killData = $.ajax({
-                    url: "ProfileData.php?steamid64=" + steamid64 + "&category=kills",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                data= new google.visualization.DataTable(killData);
-                var chart= new google.visualization.PieChart(document.getElementById('kills_div'));
-                chart.draw(data, {height: 500,title: 'Kills' });
-
-                var perksData = $.ajax({
-                    url: "ProfileData.php?steamid64=" + steamid64 + "&category=perks",
-                    dataType:"json",
-                    async: false
-                }).responseText;
-                data= new google.visualization.DataTable(perksData);
-                chart= new google.visualization.PieChart(document.getElementById('perks_div'));
-                chart.draw(data, {height: 500,title: 'Perks' })
-
-               var weaponData = $.ajax({
-                    url: "ProfileData.php?steamid64=" + steamid64 + "&category=weapons",
-                    dataType:"json",
-                    async: false
-                }).responseText;
+           var weaponData= $.ajax({
+                url: "ProfileData.php?steamid64=" + steamid64 + "&category=weapons",
+                dataType:"json",
+                async: false
+            }).responseText;
           
-                data = new google.visualization.DataTable(weaponData);
-                options = {
-                  vAxis: {title: 'Weapon',  titleTextStyle: {color: 'red'}, textStyle: {fontSize: 12}},
-                  chartArea: {top: 0, height: "95%"}
-                };
+            data= new google.visualization.DataTable(weaponData);
+            options= {
+                vAxis: {title: 'Weapon',  titleTextStyle: {color: 'red'}, textStyle: {fontSize: 12}},
+                chartArea: {top: 0, height: "95%"}
+            };
+            chart= new google.visualization.BarChart(document.getElementById('weapons_div'));
+            chart.draw(data, options); 
+
+        }
+    </script>
+</head>
     
-                chart = new google.visualization.BarChart(document.getElementById('weapons_div'));
-                chart.draw(data, options); 
-
-            }
-</script>
-
-	</head>
-	
-	<body>
-		
-		<div id="wrap">
-		<div id="nav">
-			<ul>
-				<li><a class="active" href="#" onClick="goto('#profile_div', this); return false">Profile</a></li>
-				<li><a href="#" onClick="goto('#player_div', this); return false">Player</a></li>
+<body>
+    <div id="wrap">
+        <div id="nav">
+            <ul>
+                <li><a class="active" href="#" onClick="goto('#profile_div', this); return false">Profile</a></li>
+                <li><a href="#" onClick="goto('#player_div', this); return false">Player</a></li>
                 <li><a href="#" onClick="goto('#actions_div', this); return false">Actions</a></li>
                 <li><a href="#" onClick="goto('#kills_div', this); return false">Kills</a></li>
                 <li><a href="#" onClick="goto('#perks_div', this); return false">Perks</a></li>
                 <li><a href="#" onClick="goto('#weapons_div', this); return false">Weapons</a></li>
                 <li><a href="#" onClick="goto('#sessions_div', this); return false">Sessions</a></li>
-			</ul>
-		</div>
-		
-		<div id="content">
-			<div class="contentbox-wrapper">
-				<div id="profile_div" class="contentbox"></div>
-				<div id="player_div" class="contentbox"></div>
+            </ul>
+        </div>
+        <div id="content">
+            <div class="contentbox-wrapper">
+                <div id="profile_div" class="contentbox"></div>
+                <div id="player_div" class="contentbox"></div>
                 <div id="actions_div" class="contentbox"></div>
                 <div id="kills_div" class="contentbox"></div>
                 <div id="perks_div" class="contentbox"></div>
-				<div id="weapons_div" class="contentbox"></div>
+                <div id="weapons_div" class="contentbox"></div>
                 <div id="sessions_div_outer" class="contentbox">
                     <form action="">
-  Number of rows to show:
-  <select onChange="setOption('pageSize', parseInt(this.value, 10))">
-    <option selected=selectedvalue="25">25</option>
-    <option value="50">50</option>
-    <option value="100">100</option>
-    <option value="250">250</option>
-  </select>
-</form>
+                        Number of rows to show:
+                        <select onChange="setOption('pageSize', parseInt(this.value, 10))">
+                            <option selected=selectedvalue="25">25</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="250">250</option>
+                        </select>
+                    </form>
                     <div id="sessions_div"></div>
                 </div>
-			</div>			
-			
-		</div>		
-		
-		<div id="footer">
-			Tutorial by <a href="http://gazpo.com/">gazpo.com</a>.
-		</div>
-			
-			
-		</div>	
-	
-	</body>
-
+            </div>          
+        </div>      
+        <div id="footer">
+            Tutorial by <a href="http://gazpo.com/">gazpo.com</a>.
+        </div>
+    </div>  
+</body>
 </html>
