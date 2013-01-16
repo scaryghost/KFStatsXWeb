@@ -1,10 +1,16 @@
 <?php
 
+$columns= array("name", "wins", "losses", "disconnects");
 $handler="google.visualization.Query.setResponse";
 $handler= $handler. "({version: '0.6', reqId: '0', status: 'ok', table:";
-$query= split("," , $_GET['tq']);
+$query= split("," , $_REQUEST['tq']);
+$order= "";
 
-$file= 'http://127.0.0.1:8080/records.xml?page='. $query[0] . '&rows=' . $query[1];
+if (count($query) >= 4) {
+    $order= "&group=" . $columns[intval($query[2])] . "&order=" . $query[3];
+}
+    
+$file= 'http://127.0.0.1:8080/records.xml?page='. $query[0] . '&rows=' . $query[1] . $order;
 $stats= simplexml_load_file($file);
 
 $jsonData["cols"]= array(array("label" => "Name", "type" => "string"), 

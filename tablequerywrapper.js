@@ -1,5 +1,5 @@
+/** Code taken from https://developers.google.com/chart/interactive/docs/examples#tablequerywrapper */
 var TableQueryWrapper = function(query, container, options) {
-
   this.table = new google.visualization.Table(container);
   this.query = query;
   this.sortQueryClause = '';
@@ -36,7 +36,7 @@ var TableQueryWrapper = function(query, container, options) {
  */
 TableQueryWrapper.prototype.sendAndDraw = function() {
   this.query.abort();
-  var queryClause = this.sortQueryClause + ' ' + this.pageQueryClause;
+  var queryClause = this.pageQueryClause + ',' + this.sortQueryClause;
   this.query.setQuery(queryClause);
   this.table.setSelection([]);
   var self = this;
@@ -64,8 +64,7 @@ TableQueryWrapper.prototype.handleSort = function(properties) {
   this.tableOptions['sortColumn'] = columnIndex;
   this.tableOptions['sortAscending'] = isAscending;
   // dataTable exists since the user clicked the table.
-  var colID = this.currentDataTable.getColumnId(columnIndex);
-  this.sortQueryClause = 'order by `' + colID + (!isAscending ? '` desc' : '`');
+  this.sortQueryClause = columnIndex + "," + (!isAscending ? 'desc' : 'asc');
   // Calls sendAndDraw internally.
   this.handlePage({'page': 0});
 };
