@@ -5,7 +5,6 @@
     <title>KFStatsX</title>
 
     <script type="text/javascript" src="jquery-1.8.2.js"></script>
-    <script type="text/javascript" src="tablequerywrapper.js"></script>
     <script type="text/javascript" src="kfstatsx.js"></script>
     <script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
 
@@ -27,30 +26,42 @@
     </script>
     <script type="text/javascript">
         google.setOnLoadCallback(drawVisualization);
+        var page= 0, pageSize= 25, filled;
         
         function drawVisualization() {
+            var data= new google.visualization.DataTable($.ajax({url: "Records.php?tq=0,25", dataType:"json", async: false}).responseText);
             var chart= new google.visualization.ChartWrapper({'chartType': 'Table', 'containerId': 'records_div', 
                 'options': {
-                    'page': 'enable',
+                    'page': 'event',
                     'pageSize': 25,
-                    'showRowNumber': true
-                },
-                'dataSourceUrl':'Records.php',
-                'query':'0,50'
+                    'pagingButtonsConfiguration': 'both',
+                    'showRowNumber': true,
+                }
             });
 
+            google.visualization.events.addListener(chart, 'ready', onReady);
+            filled= data.getNumberOfRows() == pageSize;
+            chart.setDataTable(data);
             chart.draw();
-/*
-            google.visualization.events.addListener(wrapper, 'ready', onReady);
             function onReady() {
-                google.visualization.events.addListener(chart.getChart(), 'page', pageHandler);
+                google.visualization.events.addListener(chart.getChart(), 'page', function(properties) {
+                    page+= parseInt(properties['page'], 10);
+                    if (page < 0) {
+                        page= 0;
+                    }
+
+                    var data= new google.visualization.DataTable($.ajax({url: "Records.php?tq=" + page + "," + pageSize.toString(), dataType:"json", async: false}).responseText);
+                    if (data.getNumberOfRows() == 0 || (!filled && data.getNumberOfRows() != pageSize)) {
+                        page--;
+                    } else {
+                        chart.setOption('firstRowNumber', pageSize * page + 1);
+                        chart.setDataTable(data);
+                        chart.draw();
+                        filled= data.getNumberOfRows() == pageSize;
+                    }
+                });
             }
-            function pageHandler() {
-                alert("Hello World!");
-            }
-*/
         }
-        
     </script>
     <script type='text/javascript'>
         google.setOnLoadCallback(drawVisualization);

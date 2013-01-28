@@ -1,8 +1,8 @@
 <?php
 
 $columns= array("name", "wins", "losses", "disconnects");
-$handler="google.visualization.Query.setResponse";
-$handler= $handler. "({version: '0.6', reqId: '0', status: 'ok', table:";
+//$handler="google.visualization.Query.setResponse";
+//$handler= $handler. "({version: '0.6', reqId: '0', status: 'ok', table:";
 $query= split("," , $_REQUEST['tq']);
 $order= "";
 
@@ -33,6 +33,7 @@ foreach($stats->records->record as $record) {
     $jsonData["rows"][$index]= $row;
     $index++;
 }
-$handler= $handler . json_encode($jsonData) . "});";
-echo $handler;
+//$handler= $handler . json_encode($jsonData) . "});";
+//echo $handler;
+echo json_encode($jsonData)
 ?>
