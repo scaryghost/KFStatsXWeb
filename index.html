@@ -26,14 +26,16 @@
     </script>
     <script type="text/javascript">
         google.setOnLoadCallback(drawVisualization);
-        var page= 0, pageSize= 25, filled;
+        var page= 0, pageSize= 25, column, order, filled;
+        var data, chart;
         
         function drawVisualization() {
-            var data= new google.visualization.DataTable($.ajax({url: "Records.php?tq=0,25", dataType:"json", async: false}).responseText);
-            var chart= new google.visualization.ChartWrapper({'chartType': 'Table', 'containerId': 'records_div', 
+            data= new google.visualization.DataTable($.ajax({url: "Records.php?tq=" + page + "," + pageSize, dataType:"json", async: false}).responseText);
+            chart= new google.visualization.ChartWrapper({'chartType': 'Table', 'containerId': 'records_div', 
                 'options': {
                     'page': 'event',
-                    'pageSize': 25,
+                    'sort': 'event',
+                    'pageSize': pageSize,
                     'pagingButtonsConfiguration': 'both',
                     'showRowNumber': true,
                 }
@@ -50,7 +52,7 @@
                         page= 0;
                     }
 
-                    var data= new google.visualization.DataTable($.ajax({url: "Records.php?tq=" + page + "," + pageSize.toString(), dataType:"json", async: false}).responseText);
+                    data= new google.visualization.DataTable($.ajax({url: "Records.php?tq=" + page + "," + pageSize, dataType:"json", async: false}).responseText);
                     if (data.getNumberOfRows() == 0 || (!filled && data.getNumberOfRows() != pageSize)) {
                         page--;
                     } else {
@@ -60,7 +62,25 @@
                         filled= data.getNumberOfRows() == pageSize;
                     }
                 });
+                google.visualization.events.addListener(chart.getChart(), 'sort', function(properties) {
+                    order= properties["ascending"] ? "asc" : "desc";
+                    column= properties["column"];
+                    data= new google.visualization.DataTable($.ajax({url: "Records.php?tq=" + page + "," + pageSize + "," + column + "," + order, dataType:"json", async: false}).responseText);
+                    filled= data.getNumberOfRows() == pageSize;
+                    chart.setOption('sortColumn', column);
+                    chart.setOption('sortAscending', properties["ascending"]);
+                    chart.setDataTable(data);
+                    chart.draw();
+                });
             }
+        }
+
+        function updatePageSize(newSize) {
+            pageSize= newSize;
+            data= new google.visualization.DataTable($.ajax({url: "Records.php?tq=" + page + "," + pageSize.toString(), dataType:"json", async: false}).responseText);
+            chart.setDataTable(data);
+            chart.setOption('pageSize', pageSize);
+            chart.draw();
         }
     </script>
     <script type='text/javascript'>
@@ -202,7 +222,7 @@
                 <div id="records_div_outer" class="contentbox">
                     <form action="">
                         Number of rows to show:
-                        <select onChange="setOption('pageSize', parseInt(this.value, 10))">
+                        <select onChange="updatePageSize(parseInt(this.value, 10))">
                             <option selected=selectedvalue="25">25</option>
                             <option value="50">50</option>
                             <option value="100">100</option>
