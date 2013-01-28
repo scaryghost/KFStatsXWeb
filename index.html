@@ -4,10 +4,10 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
     <title>KFStatsX</title>
 
-    <script type='text/javascript' src='https://www.google.com/jsapi'></script>
     <script type="text/javascript" src="jquery-1.8.2.js"></script>
     <script type="text/javascript" src="tablequerywrapper.js"></script>
     <script type="text/javascript" src="kfstatsx.js"></script>
+    <script type="text/javascript" src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'></script>
 
     <link href='http://fonts.googleapis.com/css?family=Vollkorn' rel='stylesheet' type='text/css'>      
     <link rel="stylesheet" type="text/css" href="kfstatsx.css" />       
@@ -26,91 +26,121 @@
 
     </script>
     <script type="text/javascript">
-        google.load('visualization', '1', {'packages' : ['table']});
-        google.setOnLoadCallback(init);
+        google.setOnLoadCallback(drawVisualization);
+        
+        function drawVisualization() {
+            var chart= new google.visualization.ChartWrapper({'chartType': 'Table', 'containerId': 'records_div', 
+                'options': {
+                    'page': 'enable',
+                    'pageSize': 25,
+                    'showRowNumber': true
+                },
+                'dataSourceUrl':'Records.php',
+                'query':'0,50'
+            });
 
-        var dataSourceUrl = 'Records.php';
-        var query, options, container;
-
-        function init() {
-            query = new google.visualization.Query(dataSourceUrl);
-            container = document.getElementById("records_div");
-            options = {'pageSize': 25};
-            sendAndDraw();
+            chart.draw();
+/*
+            google.visualization.events.addListener(wrapper, 'ready', onReady);
+            function onReady() {
+                google.visualization.events.addListener(chart.getChart(), 'page', pageHandler);
+            }
+            function pageHandler() {
+                alert("Hello World!");
+            }
+*/
         }
+        
+    </script>
+    <script type='text/javascript'>
+        google.setOnLoadCallback(drawVisualization);
 
-        function sendAndDraw() {
-            query.abort();
-            var tableQueryWrapper = new TableQueryWrapper(query, container, options);
-            tableQueryWrapper.sendAndDraw();
-        }
-
-        function setOption(prop, value) {
-            options[prop] = value;
-            sendAndDraw();
+        function drawVisualization() {
+            var data= new google.visualization.DataTable($.ajax({url: "LevelData.php", dataType:"json", async: false}).responseText);
+            var chart= new google.visualization.ChartWrapper({'chartType': 'Table', 'containerId': 'level_div', 'options': {
+                'allowHtml':true
+            }});
+            chart.setDataTable(data);
+            chart.draw();
         }
     </script>
-
     <script type='text/javascript'>
-        google.load('visualization', '1', {packages:['table','corechart']});
-        google.setOnLoadCallback(drawTable);
+        google.setOnLoadCallback(drawVisualization);
 
-        function drawTable() {
+        function drawVisualization() {
+            var data= new google.visualization.DataTable($.ajax({url: "DifficultyData.php", dataType:"json", async: false}).responseText);
+            var chart= new google.visualization.ChartWrapper({'chartType': 'Table', 'containerId': 'difficulty_div', 'options': {
+                'allowHtml':true
+            }});
+            chart.setDataTable(data);
+            chart.draw();
+        }
+    </script>
+    <script type='text/javascript'>
+        google.setOnLoadCallback(drawVisualization);
+
+        function drawVisualization() {
+            var data= new google.visualization.DataTable($.ajax({url: "DeathsData.php", dataType:"json", async: false}).responseText);
+            var chart= new google.visualization.ChartWrapper({'chartType': 'BarChart', 'containerId': 'deaths_div', 'options': {
+                'width': '100%',
+                'height': '100%',
+                'chartArea': {top: 0, height: '95%'}, 
+                'vAxis': {title: 'Weapon',  titleTextStyle: {color: 'red'}, textStyle: {fontSize: 12}}
+            }});
+            chart.setDataTable(data);
+            var numRows = chart.getDataTable().getNumberOfRows();
+            var expectedHeight = numRows * 30;
+            if (parseInt(chart.getOption('height'), 10) != expectedHeight) {
+                // Update the chart options and redraw just it
+                chart.setOption('height', expectedHeight);
+                chart.draw();
+            }
+        }
+    </script>
+    <script type='text/javascript'>
+        google.setOnLoadCallback(drawVisualization);
+
+        function drawVisualization() {
+            var data= new google.visualization.DataTable($.ajax({url: "KillsData.php", dataType:"json", async: false}).responseText);
+            var chart= new google.visualization.ChartWrapper({'chartType': 'BarChart', 'containerId': 'kills_div', 'options': {
+                'width': '100%',
+                'height': '100%',
+                'chartArea': {top: 0, height: '95%'}, 
+                'vAxis': {title: 'Weapon',  titleTextStyle: {color: 'red'}, textStyle: {fontSize: 12}}
+            }});
+            chart.setDataTable(data);
+            var numRows = chart.getDataTable().getNumberOfRows();
+            var expectedHeight = numRows * 30;
+            if (parseInt(chart.getOption('height'), 10) != expectedHeight) {
+                // Update the chart options and redraw just it
+                chart.setOption('height', expectedHeight);
+                chart.draw();
+            }
+        }
+    </script>
+    <script type='text/javascript'>
+        google.setOnLoadCallback(drawVisualization);
+
+        function drawVisualization() {
+            var data= new google.visualization.DataTable($.ajax({url: "PerksData.php", dataType:"json", async: false}).responseText);
+            var chart= new google.visualization.ChartWrapper({'chartType': 'PieChart', 'containerId': 'perks_div', 'options': {
+                'allowHtml':true
+            }});
+            chart.setDataTable(data);
+            chart.draw();
+        }
+    </script>
+    <script type='text/javascript'>
+        google.setOnLoadCallback(drawVisualization)
+
+        function drawVisualization() {
             var summaryData = $.ajax({
                 url: "Summary.php",
                 dataType:"text",
                 async: false
             }).responseText;
             document.getElementById("summary_div").innerHTML= summaryData;
-
-            var levelData = $.ajax({
-                url: "LevelData.php",
-                dataType:"json",
-                async: false
-            }).responseText;
-            var data= new google.visualization.DataTable(levelData);
-            var table= new google.visualization.Table(document.getElementById('level_div'));
-            table.draw(data, {allowHtml: true});
-
-            var diffData = $.ajax({
-                url: "DifficultyData.php",
-                dataType:"json",
-                async: false
-            }).responseText;
-            data= new google.visualization.DataTable(diffData);
-            table= new google.visualization.Table(document.getElementById('difficulty_div'));
-            table.draw(data, {allowHtml: true});
-
-            var deathData = $.ajax({
-                url: "DeathsData.php",
-                dataType:"json",
-                async: false
-            }).responseText;
-            data= new google.visualization.DataTable(deathData);
-            var chart= new google.visualization.PieChart(document.getElementById('deaths_div'));
-            chart.draw(data, {height: 500,title: 'Deaths' });
-
-            var killData = $.ajax({
-                url: "KillsData.php",
-                dataType:"json",
-                async: false
-            }).responseText;
-            data= new google.visualization.DataTable(killData);
-            chart= new google.visualization.PieChart(document.getElementById('kills_div'));
-            chart.draw(data, {height: 500,title: 'Kills' })
-
-            var killData = $.ajax({
-                url: "PerksData.php",
-                dataType:"json",
-                async: false
-            }).responseText;
-            data= new google.visualization.DataTable(killData);
-            chart= new google.visualization.PieChart(document.getElementById('perks_div'));
-            chart.draw(data, {height: 500,title: 'Perks' })
         }
-    </script>
-<script type="text/javascript"
-        src='https://www.google.com/jsapi?autoload={"modules":[{"name":"visualization","version":"1"}]}'>
     </script>
 
     <script type='text/javascript'>
@@ -121,17 +151,17 @@
             var chart= new google.visualization.ChartWrapper({'chartType': 'BarChart', 'containerId': 'weapons_div', 'options': {
                 'width': '100%',
                 'height': '100%',
-                'chartArea': {top: 0, right: 0, bottom: 0}, 
+                'chartArea': {top: 0, height: '95%'}, 
                 'vAxis': {title: 'Weapon',  titleTextStyle: {color: 'red'}, textStyle: {fontSize: 12}}
             }});
             chart.setDataTable(data);
             var numRows = chart.getDataTable().getNumberOfRows();
-            var expectedHeight = numRows * 60;
+            var expectedHeight = numRows * 30;
             if (parseInt(chart.getOption('height'), 10) != expectedHeight) {
                 // Update the chart options and redraw just it
                 chart.setOption('height', expectedHeight);
                 chart.draw();
-          }
+            }
         }
     </script>
 </head>
